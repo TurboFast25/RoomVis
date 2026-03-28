@@ -34,6 +34,30 @@
 
         <div class="panel-block">
           <div class="section-heading">
+            <h2>Add item</h2>
+            <span class="tag muted">Image + link</span>
+          </div>
+          <div class="custom-item-form">
+            <label>
+              Item name
+              <input id="custom-item-name" type="text" placeholder="Low profile lounge chair" />
+            </label>
+            <label>
+              Image URL
+              <input id="custom-item-image" type="url" placeholder="https://..." />
+            </label>
+            <label>
+              Product link
+              <input id="custom-item-link" type="url" placeholder="https://store.example/item" />
+            </label>
+            <button id="add-custom-item" class="primary-button wide" type="button">
+              Add to library
+            </button>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="section-heading">
             <h2>Furniture kit</h2>
             <button id="reset-room" class="ghost-button" type="button">Reset</button>
           </div>
@@ -98,6 +122,16 @@
               Elevation
               <input id="depth-control" type="range" min="-40" max="40" value="0" />
             </label>
+            <a
+              id="selection-link"
+              class="ghost-button wide selection-link"
+              href="#"
+              target="_blank"
+              rel="noreferrer"
+              hidden
+            >
+              Open product link
+            </a>
             <button id="remove-item" class="ghost-button wide" type="button">Remove selected</button>
           </div>
         </div>
@@ -123,14 +157,17 @@
 
     <template id="furniture-card-template">
       <button class="furniture-card" type="button" draggable="true">
-        <span class="furniture-icon"></span>
-        <span class="furniture-name"></span>
+        <img class="furniture-image" alt="" />
+        <span class="furniture-meta">
+          <span class="furniture-name"></span>
+          <span class="furniture-link-copy"></span>
+        </span>
       </button>
     </template>
 
     <template id="placed-item-template">
       <button class="placed-item" type="button">
-        <span class="placed-item__icon"></span>
+        <img class="placed-item__image" alt="" />
       </button>
     </template>
 

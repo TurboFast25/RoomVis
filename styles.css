@@ -37,6 +37,15 @@ textarea {
   font: inherit;
 }
 
+input[type="text"],
+input[type="url"] {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.72);
+}
+
 .app-shell {
   min-height: 100vh;
   display: grid;
@@ -155,15 +164,32 @@ h2 {
   cursor: grabbing;
 }
 
-.furniture-icon,
-.placed-item__icon {
-  width: 40px;
-  height: 40px;
-  display: grid;
-  place-items: center;
+.furniture-image {
+  width: 54px;
+  height: 54px;
+  object-fit: cover;
   border-radius: 14px;
   background: rgba(28, 109, 93, 0.12);
-  font-size: 1.3rem;
+  flex-shrink: 0;
+}
+
+.furniture-meta {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.furniture-name,
+.furniture-link-copy {
+  display: block;
+}
+
+.furniture-link-copy {
+  font-size: 0.8rem;
+  color: var(--muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .workspace {
@@ -287,6 +313,13 @@ h2 {
   cursor: grabbing;
 }
 
+.placed-item__image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 20px;
+}
+
 .inspector {
   display: grid;
   gap: 14px;
@@ -364,6 +397,17 @@ textarea {
   color: #efe7de;
   overflow: auto;
   white-space: pre-wrap;
+}
+
+.custom-item-form {
+  display: grid;
+  gap: 12px;
+}
+
+.selection-link {
+  display: inline-flex;
+  justify-content: center;
+  text-decoration: none;
 }
 
 .result-panel {
