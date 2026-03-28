@@ -6,6 +6,7 @@ import {
 const GRID_COLUMNS = 24;
 const GRID_ROWS = 24;
 const THEME_STORAGE_KEY = "furnishframe-theme";
+const SURFACES = ["floor", "wall"];
 
 const furnitureCatalog = [
   createCatalogItem({
@@ -79,6 +80,7 @@ const els = {
   scaleControl: document.querySelector("#scale-control"),
   rotationControl: document.querySelector("#rotation-control"),
   depthControl: document.querySelector("#depth-control"),
+  surfaceButtons: Array.from(document.querySelectorAll(".surface-selector__button")),
   selectionStatus: document.querySelector("#selection-status"),
   removeItem: document.querySelector("#remove-item"),
   promptInput: document.querySelector("#prompt-input"),
@@ -117,6 +119,9 @@ function attachEvents() {
   els.scaleControl.addEventListener("input", updateSelectedItemFromControls);
   els.rotationControl.addEventListener("input", updateSelectedItemFromControls);
   els.depthControl.addEventListener("input", updateSelectedItemFromControls);
+  els.surfaceButtons.forEach((button) => {
+    button.addEventListener("click", () => updateSelectedItemSurface(button.dataset.surface));
+  });
   els.removeItem.addEventListener("click", removeSelectedItem);
   els.generateScene.addEventListener("click", generateScene);
   els.resetRoom.addEventListener("click", resetRoom);
@@ -275,6 +280,7 @@ function addFurniture(furnitureId, x, y) {
     scale: 100,
     rotation: 0,
     elevation: 0,
+    surface: getDefaultSurface(definition),
   };
 
   state.items = [...state.items, nextItem];
@@ -343,6 +349,24 @@ function updateSelectedItemFromControls() {
   );
 
   renderPlacedItems();
+}
+
+function updateSelectedItemSurface(surface) {
+  if (!SURFACES.includes(surface)) {
+    return;
+  }
+
+  const selected = getSelectedItem();
+  if (!selected) {
+    return;
+  }
+
+  state.items = state.items.map((item) =>
+    item.instanceId === selected.instanceId ? { ...item, surface } : item,
+  );
+
+  renderPlacedItems();
+  renderSelectionControls();
 }
 
 function removeSelectedItem() {
@@ -415,7 +439,7 @@ async function generateScene() {
     roomImageDataUrl: state.roomImageDataUrl,
     roomAnalysis: state.roomAnalysis,
     prompt: els.promptInput.value.trim(),
-    furniture: state.items.map(({ name, imageUrl, productUrl, x, y, scale, rotation }) => ({
+    furniture: state.items.map(({ name, imageUrl, productUrl, x, y, scale, rotation, surface }) => ({
       name,
       imageUrl,
       productUrl,
@@ -423,6 +447,7 @@ async function generateScene() {
       y,
       scale,
       rotation,
+      surface: getNormalizedSurface(surface),
     })),
   };
 
@@ -482,9 +507,9 @@ function renderPlacedItems() {
     button.style.top = `${item.y}%`;
     button.style.setProperty("--model-width", `${metrics.width}px`);
     button.style.setProperty("--model-height", `${metrics.height}px`);
-    button.style.transform =
-      `translate(-50%, calc(-100% + ${item.elevation}px)) rotate(${item.rotation}deg)`;
+    button.style.transform = getItemTransform(item);
     button.classList.toggle("is-selected", item.instanceId === state.selectedId);
+    button.classList.toggle("is-wall-mounted", getNormalizedSurface(item.surface) === "wall");
     button.dataset.silhouette = item.silhouette || "custom";
     sprite.src = item.imageUrl;
     sprite.alt = item.name;
@@ -500,6 +525,10 @@ function renderSelectionControls() {
     els.scaleControl.value = "100";
     els.rotationControl.value = "0";
     els.depthControl.value = "0";
+    els.surfaceButtons.forEach((button) => {
+      button.classList.remove("is-active");
+      button.disabled = true;
+    });
     els.selectionLink.hidden = true;
     els.selectionLink.removeAttribute("href");
     return;
@@ -509,6 +538,11 @@ function renderSelectionControls() {
   els.scaleControl.value = String(selected.scale);
   els.rotationControl.value = String(selected.rotation);
   els.depthControl.value = String(selected.elevation);
+  const selectedSurface = getNormalizedSurface(selected.surface);
+  els.surfaceButtons.forEach((button) => {
+    button.classList.toggle("is-active", button.dataset.surface === selectedSurface);
+    button.disabled = false;
+  });
   if (selected.productUrl) {
     els.selectionLink.href = selected.productUrl;
     els.selectionLink.hidden = false;
@@ -520,6 +554,22 @@ function renderSelectionControls() {
 
 function getSelectedItem() {
   return state.items.find((item) => item.instanceId === state.selectedId) ?? null;
+}
+
+function getNormalizedSurface(surface) {
+  return SURFACES.includes(surface) ? surface : "floor";
+}
+
+function getDefaultSurface(definition) {
+  return definition.silhouette === "shelf" ? "wall" : "floor";
+}
+
+function getItemTransform(item) {
+  if (getNormalizedSurface(item.surface) === "wall") {
+    return `translate(-50%, calc(-50% + ${item.elevation}px)) rotate(${item.rotation}deg)`;
+  }
+
+  return `translate(-50%, calc(-100% + ${item.elevation}px)) rotate(${item.rotation}deg)`;
 }
 
 function clampPercent(value) {

@@ -383,6 +383,12 @@ h2 {
   filter: drop-shadow(0 0 0.9rem rgba(243, 179, 76, 0.42));
 }
 
+.placed-item.is-wall-mounted .placed-item__sprite {
+  filter:
+    drop-shadow(0 0 0.55rem rgba(255, 255, 255, 0.2))
+    drop-shadow(0 10px 16px rgba(34, 23, 16, 0.12));
+}
+
 .placed-item:active {
   cursor: grabbing;
 }
@@ -402,6 +408,32 @@ h2 {
 .inspector {
   display: grid;
   gap: 14px;
+}
+
+.surface-selector {
+  display: grid;
+  gap: 10px;
+}
+
+.surface-selector__label {
+  color: var(--muted);
+}
+
+.surface-selector__controls {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.surface-selector__button.is-active {
+  background: var(--primary);
+  border-color: transparent;
+  color: white;
+}
+
+.surface-selector__button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
 .inspector label {

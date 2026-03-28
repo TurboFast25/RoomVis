@@ -66,11 +66,27 @@ def build_gemini_request(payload: dict) -> dict:
         raise ValueError("roomImageDataUrl is required")
 
     mime_type, base64_data = parse_data_url(room_image_data_url)
-    furniture_lines = [
-        f"- {item['name']} at approximately ({round(item['x'])}%, {round(item['y'])}%) "
-        f"with scale {item['scale']} and rotation {item['rotation']} degrees"
-        for item in furniture
-    ]
+    furniture_lines = []
+    for item in furniture:
+        product_url = str(item.get("productUrl", "")).strip()
+        surface = "wall" if str(item.get("surface", "")).strip().lower() == "wall" else "floor"
+        measurement_note = (
+            " Use the linked Amazon listing as the authoritative source for exact product measurements "
+            "to the best of your ability."
+            if "amazon." in product_url.lower()
+            else ""
+        )
+        source_note = f" Product link: {product_url}." if product_url else ""
+        surface_note = (
+            " Mount it against the wall at the specified point and keep it wall-scaled."
+            if surface == "wall"
+            else " Place it on the floor at the specified point with a grounded footprint."
+        )
+        furniture_lines.append(
+            f"- {item['name']} at approximately ({round(item['x'])}%, {round(item['y'])}%) "
+            f"on the {surface} with scale {item['scale']} and rotation {item['rotation']} degrees."
+            f"{surface_note}{source_note}{measurement_note}"
+        )
     mapping_lines = describe_room_mapping(room_analysis)
 
     prompt_parts = [
@@ -80,8 +96,12 @@ def build_gemini_request(payload: dict) -> dict:
         "Add only the staged furniture items listed below.",
         "Do not redesign, replace, remove, or restyle any existing architecture, decor, furniture, windows, doors, art, rugs, or lighting already present in the room.",
         "Preserve the original camera position, room layout, perspective, materials, shadows, and all existing objects unless one of the staged items physically occludes a small portion of them.",
-        "If a requested placement conflicts with a wall, doorway, window, or existing object, keep the item but shift it minimally to the nearest plausible floor position.",
+        "Respect the selected surface for each staged item: wall items should remain wall-mounted, and floor items should remain floor-placed.",
+        "If a requested placement conflicts with a wall, doorway, window, or existing object, keep the item on its selected surface and shift it minimally to the nearest plausible position.",
         "Render a single photorealistic still image from the uploaded camera viewpoint.",
+        "For any staged item with a product link, follow the real product proportions and dimensions as closely as possible.",
+        "If the product link is an Amazon listing, use the exact measurements from that Amazon listing to the best of your ability.",
+        "If exact measurements are unavailable, infer conservative real-world dimensions from the product image, title, and typical category proportions instead of inventing exaggerated sizes.",
         "Stage the room photorealistically with the following furniture placements.",
         "\n".join(furniture_lines) if furniture_lines else "- No extra furniture placements were supplied.",
         f"Total staged items to add: {len(furniture)}.",

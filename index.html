@@ -119,6 +119,27 @@
             <span id="selection-status" class="tag">Nothing selected</span>
           </div>
           <div class="inspector">
+            <div class="surface-selector">
+              <span class="surface-selector__label">Surface</span>
+              <div class="surface-selector__controls">
+                <button
+                  id="surface-floor"
+                  class="ghost-button surface-selector__button"
+                  type="button"
+                  data-surface="floor"
+                >
+                  Floor
+                </button>
+                <button
+                  id="surface-wall"
+                  class="ghost-button surface-selector__button"
+                  type="button"
+                  data-surface="wall"
+                >
+                  Wall
+                </button>
+              </div>
+            </div>
             <label>
               Scale
               <input id="scale-control" type="range" min="50" max="180" value="100" />
