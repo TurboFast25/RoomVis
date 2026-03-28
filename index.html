@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>RoomVis AR Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Instrument+Serif:ital@0;1&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="panel panel-left">
+        <div class="panel-block">
+          <p class="eyebrow">RoomVis</p>
+          <h1>AR room staging for uploaded photos.</h1>
+          <p class="lede">
+            Upload a room image, drag furniture into place, and prepare the scene
+            for AI-assisted generation once the Nano Banana API is wired in.
+          </p>
+        </div>
+
+        <div class="panel-block">
+          <label class="upload-card" for="room-upload">
+            <span class="upload-title">Upload room image</span>
+            <span class="upload-copy">JPG, PNG, or WEBP</span>
+            <input id="room-upload" type="file" accept="image/*" />
+          </label>
+        </div>
+
+        <div class="panel-block">
+          <div class="section-heading">
+            <h2>Furniture kit</h2>
+            <button id="reset-room" class="ghost-button" type="button">Reset</button>
+          </div>
+          <div id="furniture-library" class="furniture-library"></div>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="workspace-header">
+          <div>
+            <p class="eyebrow">Stage</p>
+            <h2>Drag furniture onto the room</h2>
+          </div>
+          <div class="workspace-actions">
+            <button id="toggle-grid" class="ghost-button" type="button">Grid On</button>
+            <button id="generate-scene" class="primary-button" type="button">
+              Generate with Nano Banana
+            </button>
+          </div>
+        </header>
+
+        <section class="room-board-wrap">
+          <div id="drop-hint" class="drop-hint">
+            Upload a room image to start staging the scene.
+          </div>
+          <div id="room-board" class="room-board grid-hidden">
+            <img id="room-image" class="room-image" alt="Uploaded room" />
+            <div id="furniture-layer" class="furniture-layer"></div>
+          </div>
+        </section>
+
+        <section class="result-panel">
+          <div class="section-heading">
+            <h2>Generated result</h2>
+            <span id="result-status" class="tag muted">No output yet</span>
+          </div>
+          <div class="result-frame">
+            <img id="generated-image" class="generated-image" alt="Generated room result" hidden />
+            <div id="result-placeholder" class="result-placeholder">
+              Generated room preview will appear here.
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside class="panel panel-right">
+        <div class="panel-block">
+          <div class="section-heading">
+            <h2>Selection</h2>
+            <span id="selection-status" class="tag">Nothing selected</span>
+          </div>
+          <div class="inspector">
+            <label>
+              Scale
+              <input id="scale-control" type="range" min="50" max="180" value="100" />
+            </label>
+            <label>
+              Rotation
+              <input id="rotation-control" type="range" min="-45" max="45" value="0" />
+            </label>
+            <label>
+              Elevation
+              <input id="depth-control" type="range" min="-40" max="40" value="0" />
+            </label>
+            <button id="remove-item" class="ghost-button wide" type="button">Remove selected</button>
+          </div>
+        </div>
+
+        <div class="panel-block">
+          <div class="section-heading">
+            <h2>AI direction</h2>
+            <span class="tag muted">Stubbed</span>
+          </div>
+          <label>
+            Style prompt
+            <textarea id="prompt-input" rows="6" placeholder="Warm Scandinavian living room with oak finishes, soft daylight, and a low modular sofa."></textarea>
+          </label>
+          <p class="helper-copy">
+            The generation call is routed through a placeholder service module so
+            the real Google Nano Banana integration can be added once you share the
+            API key and endpoint details.
+          </p>
+          <pre id="generation-log" class="generation-log">No generation requests yet.</pre>
+        </div>
+      </aside>
+    </div>
+
+    <template id="furniture-card-template">
+      <button class="furniture-card" type="button" draggable="true">
+        <span class="furniture-icon"></span>
+        <span class="furniture-name"></span>
+      </button>
+    </template>
+
+    <template id="placed-item-template">
+      <button class="placed-item" type="button">
+        <span class="placed-item__icon"></span>
+      </button>
+    </template>
+
+    <script type="module" src="./src/app.js"></script>
+  </body>
+</html>
