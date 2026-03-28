@@ -119,27 +119,6 @@
             <span id="selection-status" class="tag">Nothing selected</span>
           </div>
           <div class="inspector">
-            <div class="surface-selector">
-              <span class="surface-selector__label">Surface</span>
-              <div class="surface-selector__controls">
-                <button
-                  id="surface-floor"
-                  class="ghost-button surface-selector__button"
-                  type="button"
-                  data-surface="floor"
-                >
-                  Floor
-                </button>
-                <button
-                  id="surface-wall"
-                  class="ghost-button surface-selector__button"
-                  type="button"
-                  data-surface="wall"
-                >
-                  Wall
-                </button>
-              </div>
-            </div>
             <label>
               Scale
               <input id="scale-control" type="range" min="50" max="180" value="100" />
@@ -170,6 +149,40 @@
           <div class="section-heading">
             <h2>AI direction</h2>
             <span class="tag muted">Stubbed</span>
+          </div>
+          <div class="finish-controls">
+            <label>
+              Wall color
+              <input id="wall-color-input" type="text" placeholder="Warm white" />
+            </label>
+            <label>
+              Wall material
+              <select id="wall-material-select">
+                <option value="">Keep existing</option>
+                <option value="paint">Paint</option>
+                <option value="limewash">Limewash</option>
+                <option value="plaster">Plaster</option>
+                <option value="wallpaper">Wallpaper</option>
+                <option value="wood paneling">Wood paneling</option>
+                <option value="concrete">Concrete</option>
+              </select>
+            </label>
+            <label>
+              Floor color
+              <input id="floor-color-input" type="text" placeholder="Natural oak" />
+            </label>
+            <label>
+              Floor material
+              <select id="floor-material-select">
+                <option value="">Keep existing</option>
+                <option value="hardwood">Hardwood</option>
+                <option value="tile">Tile</option>
+                <option value="stone">Stone</option>
+                <option value="concrete">Concrete</option>
+                <option value="carpet">Carpet</option>
+                <option value="laminate">Laminate</option>
+              </select>
+            </label>
           </div>
           <label>
             Style prompt
