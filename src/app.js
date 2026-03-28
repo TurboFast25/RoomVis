@@ -120,7 +120,7 @@ function attachEvents() {
   els.addCustomItem.addEventListener("click", addCustomItemToLibrary);
   els.resultViewer.addEventListener("pointerdown", beginResultViewerDrag);
   els.resultViewer.addEventListener("wheel", handleResultViewerWheel, { passive: false });
-  els.generatedImage.addEventListener("load", resetResultViewer);
+  els.generatedImage.addEventListener("load", handleGeneratedImageLoad);
   document.addEventListener("keydown", handleKeydown);
 }
 
@@ -604,6 +604,7 @@ function setResultState({ status, views, activeViewId }) {
   const activeView = getActiveGeneratedView();
   if (!activeView?.imageDataUrl) {
     resetResultViewer();
+    els.resultFrame.style.removeProperty("--result-aspect-ratio");
     els.resultNav.hidden = true;
     els.resultViewer.hidden = true;
     els.resultViewerHint.hidden = true;
@@ -620,6 +621,11 @@ function setResultState({ status, views, activeViewId }) {
   els.resultViewer.hidden = false;
   els.resultViewerHint.hidden = false;
   els.resultPlaceholder.hidden = true;
+}
+
+function handleGeneratedImageLoad() {
+  syncResultFrameAspectRatio();
+  resetResultViewer();
 }
 
 function renderResultNav() {
@@ -714,18 +720,49 @@ function resetResultViewer() {
 }
 
 function clampViewerOffsets() {
-  const viewportWidth = els.resultViewer.clientWidth || 1;
-  const viewportHeight = els.resultViewer.clientHeight || 1;
-  const horizontalLimit = ((state.viewer.zoom - 1) * viewportWidth) / 2;
-  const verticalLimit = ((state.viewer.zoom - 1) * viewportHeight) / 2;
+  const {
+    viewportWidth,
+    viewportHeight,
+    fittedWidth,
+    fittedHeight,
+  } = getResultImageViewportMetrics();
+  const horizontalLimit = Math.max(0, (fittedWidth * state.viewer.zoom - viewportWidth) / 2);
+  const verticalLimit = Math.max(0, (fittedHeight * state.viewer.zoom - viewportHeight) / 2);
 
   state.viewer.offsetX = Math.max(-horizontalLimit, Math.min(horizontalLimit, state.viewer.offsetX));
   state.viewer.offsetY = Math.max(-verticalLimit, Math.min(verticalLimit, state.viewer.offsetY));
 }
 
+function getResultImageViewportMetrics() {
+  const viewportWidth = els.resultViewer.clientWidth || 1;
+  const viewportHeight = els.resultViewer.clientHeight || 1;
+  const naturalWidth = els.generatedImage.naturalWidth || viewportWidth;
+  const naturalHeight = els.generatedImage.naturalHeight || viewportHeight;
+  const fitScale = Math.min(viewportWidth / naturalWidth, viewportHeight / naturalHeight);
+
+  return {
+    viewportWidth,
+    viewportHeight,
+    fittedWidth: naturalWidth * fitScale,
+    fittedHeight: naturalHeight * fitScale,
+  };
+}
+
 function renderResultViewer() {
   els.generatedImage.style.transform =
     `translate(${state.viewer.offsetX}px, ${state.viewer.offsetY}px) scale(${state.viewer.zoom})`;
+}
+
+function syncResultFrameAspectRatio() {
+  const naturalWidth = els.generatedImage.naturalWidth;
+  const naturalHeight = els.generatedImage.naturalHeight;
+
+  if (!naturalWidth || !naturalHeight) {
+    els.resultFrame.style.removeProperty("--result-aspect-ratio");
+    return;
+  }
+
+  els.resultFrame.style.setProperty("--result-aspect-ratio", `${naturalWidth} / ${naturalHeight}`);
 }
 
 function createCatalogItem({ id, name, color, silhouette }) {
