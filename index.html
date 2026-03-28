@@ -79,34 +79,36 @@
           </div>
         </header>
 
-        <section class="room-board-wrap">
-          <div id="drop-hint" class="drop-hint">
-            Upload a room image to start staging the scene.
-          </div>
-          <div id="room-board" class="room-board grid-hidden">
-            <img id="room-image" class="room-image" alt="Uploaded room" />
-            <div id="furniture-layer" class="furniture-layer"></div>
-          </div>
-        </section>
+        <div class="workspace-main">
+          <section class="room-board-wrap">
+            <div id="drop-hint" class="drop-hint">
+              Upload a room image to start staging the scene.
+            </div>
+            <div id="room-board" class="room-board grid-hidden">
+              <img id="room-image" class="room-image" alt="Uploaded room" />
+              <div id="furniture-layer" class="furniture-layer"></div>
+            </div>
+          </section>
 
-        <section class="result-panel">
-          <div class="section-heading">
-            <h2>Generated result</h2>
-            <span id="result-status" class="tag muted">No output yet</span>
-          </div>
-          <div id="result-nav" class="result-nav" hidden></div>
-          <div id="result-frame" class="result-frame">
-            <div id="result-viewer" class="result-viewer" hidden>
-              <img id="generated-image" class="generated-image" alt="Generated room result" hidden />
+          <section class="result-panel">
+            <div class="section-heading">
+              <h2>Generated result</h2>
+              <span id="result-status" class="tag muted">No output yet</span>
             </div>
-            <div id="result-placeholder" class="result-placeholder">
-              Generated room preview will appear here.
+            <div id="result-nav" class="result-nav" hidden></div>
+            <div id="result-frame" class="result-frame">
+              <div id="result-viewer" class="result-viewer" hidden>
+                <img id="generated-image" class="generated-image" alt="Generated room result" hidden />
+              </div>
+              <div id="result-placeholder" class="result-placeholder">
+                Generated room preview will appear here.
+              </div>
             </div>
-          </div>
-          <p id="result-viewer-hint" class="helper-copy result-viewer-hint" hidden>
-            Drag to look around the generated room. Use the mouse wheel or trackpad to zoom.
-          </p>
-        </section>
+            <p id="result-viewer-hint" class="helper-copy result-viewer-hint" hidden>
+              Drag to look around the generated room. Use the mouse wheel or trackpad to zoom.
+            </p>
+          </section>
+        </div>
       </main>
 
       <aside class="panel panel-right">
