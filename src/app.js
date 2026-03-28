@@ -1,5 +1,8 @@
 import { requestNanoBananaGeneration } from "./services/nanoBanana.js";
 
+const GRID_COLUMNS = 24;
+const GRID_ROWS = 24;
+
 const furnitureCatalog = [
   createCatalogItem({
     id: "sofa",
@@ -81,6 +84,8 @@ render();
 
 function attachEvents() {
   els.roomUpload.addEventListener("change", handleRoomUpload);
+  els.roomImage.addEventListener("load", render);
+  window.addEventListener("resize", renderPlacedItems);
   els.furnitureLayer.addEventListener("pointerdown", beginExistingItemDrag);
   els.furnitureLayer.addEventListener("click", handlePlacedItemClick);
   els.roomBoard.addEventListener("dragover", handleBoardDragOver);
@@ -122,7 +127,7 @@ function renderFurnitureLibrary() {
         return;
       }
 
-      addFurniture(entry.id, 50, 50);
+      addFurniture(entry.id, Math.floor(GRID_COLUMNS / 2), Math.floor(GRID_ROWS / 2));
     });
 
     els.furnitureLibrary.appendChild(fragment);
@@ -185,17 +190,18 @@ function handleBoardDrop(event) {
     return;
   }
 
-  const boardRect = els.roomBoard.getBoundingClientRect();
-  const x = ((event.clientX - boardRect.left) / boardRect.width) * 100;
-  const y = ((event.clientY - boardRect.top) / boardRect.height) * 100;
-  addFurniture(furnitureId, x, y);
+  const { column, row } = getGridPositionFromPointer(event);
+  addFurniture(furnitureId, column, row);
 }
 
-function addFurniture(furnitureId, x, y) {
+function addFurniture(furnitureId, column, row) {
   const definition = furnitureCatalog.find((item) => item.id === furnitureId);
   if (!definition) {
     return;
   }
+
+  const safeColumn = clampGridIndex(column, GRID_COLUMNS);
+  const safeRow = clampGridIndex(row, GRID_ROWS);
 
   const nextItem = {
     instanceId: crypto.randomUUID(),
@@ -203,8 +209,8 @@ function addFurniture(furnitureId, x, y) {
     name: definition.name,
     imageUrl: definition.imageUrl,
     productUrl: definition.productUrl,
-    x,
-    y,
+    gridColumn: safeColumn,
+    gridRow: safeRow,
     scale: 100,
     rotation: 0,
     elevation: 0,
@@ -225,14 +231,13 @@ function beginExistingItemDrag(event) {
   state.selectedId = button.dataset.instanceId;
   renderSelectionControls();
 
-  const boardRect = els.roomBoard.getBoundingClientRect();
-
   const move = (moveEvent) => {
-    const x = clampPercent(((moveEvent.clientX - boardRect.left) / boardRect.width) * 100);
-    const y = clampPercent(((moveEvent.clientY - boardRect.top) / boardRect.height) * 100);
+    const { column, row } = getGridPositionFromPointer(moveEvent);
 
     state.items = state.items.map((item) =>
-      item.instanceId === state.selectedId ? { ...item, x, y } : item,
+      item.instanceId === state.selectedId
+        ? { ...item, gridColumn: column, gridRow: row }
+        : item,
     );
 
     renderPlacedItems();
@@ -321,15 +326,21 @@ async function generateScene() {
   const payload = {
     roomImageDataUrl: state.roomImageDataUrl,
     prompt: els.promptInput.value.trim(),
-    furniture: state.items.map(({ name, imageUrl, productUrl, x, y, scale, rotation }) => ({
-      name,
-      imageUrl,
-      productUrl,
-      x,
-      y,
-      scale,
-      rotation,
-    })),
+    furniture: state.items.map(
+      ({ name, imageUrl, productUrl, gridColumn, gridRow, scale, rotation }) => {
+        const { x, y } = getPercentPositionFromGrid(gridColumn, gridRow);
+
+        return {
+          name,
+          imageUrl,
+          productUrl,
+          x,
+          y,
+          scale,
+          rotation,
+        };
+      },
+    ),
   };
 
   setLog("Submitting staged room payload to Nano Banana service...");
@@ -353,20 +364,23 @@ function render() {
   els.roomBoard.classList.toggle("is-ready", ready);
   els.dropHint.hidden = ready;
   els.roomImage.src = state.roomImageDataUrl;
+  syncBoardToImage();
   renderPlacedItems();
   renderSelectionControls();
 }
 
 function renderPlacedItems() {
+  syncBoardToImage();
   els.furnitureLayer.innerHTML = "";
 
   state.items.forEach((item) => {
     const fragment = els.placedTemplate.content.cloneNode(true);
     const button = fragment.querySelector(".placed-item");
+    const { x, y } = getPercentPositionFromGrid(item.gridColumn, item.gridRow);
 
     button.dataset.instanceId = item.instanceId;
-    button.style.left = `${item.x}%`;
-    button.style.top = `${item.y}%`;
+    button.style.left = `${x}%`;
+    button.style.top = `${y}%`;
     button.style.transform = `translate(-50%, -50%) scale(${item.scale / 100}) rotate(${item.rotation}deg) translateY(${item.elevation}px)`;
     button.classList.toggle("is-selected", item.instanceId === state.selectedId);
     const image = fragment.querySelector(".placed-item__image");
@@ -406,8 +420,66 @@ function getSelectedItem() {
   return state.items.find((item) => item.instanceId === state.selectedId) ?? null;
 }
 
-function clampPercent(value) {
-  return Math.min(96, Math.max(4, value));
+function getGridPositionFromPointer(event) {
+  const imageRect = getDisplayedImageRect();
+  const relativeX = clamp01((event.clientX - imageRect.left) / imageRect.width);
+  const relativeY = clamp01((event.clientY - imageRect.top) / imageRect.height);
+
+  return {
+    column: Math.min(GRID_COLUMNS - 1, Math.floor(relativeX * GRID_COLUMNS)),
+    row: Math.min(GRID_ROWS - 1, Math.floor(relativeY * GRID_ROWS)),
+  };
+}
+
+function getPercentPositionFromGrid(column, row) {
+  return {
+    x: ((column + 0.5) / GRID_COLUMNS) * 100,
+    y: ((row + 0.5) / GRID_ROWS) * 100,
+  };
+}
+
+function getDisplayedImageRect() {
+  const boardRect = els.roomBoard.getBoundingClientRect();
+  const naturalWidth = els.roomImage.naturalWidth || boardRect.width || 1;
+  const naturalHeight = els.roomImage.naturalHeight || boardRect.height || 1;
+  const scale = Math.min(boardRect.width / naturalWidth, boardRect.height / naturalHeight);
+  const width = naturalWidth * scale;
+  const height = naturalHeight * scale;
+  const left = boardRect.left + (boardRect.width - width) / 2;
+  const top = boardRect.top + (boardRect.height - height) / 2;
+
+  return {
+    left,
+    top,
+    width,
+    height,
+    leftPercent: (left - boardRect.left) / boardRect.width * 100,
+    topPercent: (top - boardRect.top) / boardRect.height * 100,
+    widthPercent: width / boardRect.width * 100,
+    heightPercent: height / boardRect.height * 100,
+  };
+}
+
+function syncBoardToImage() {
+  const ready = Boolean(state.roomImageDataUrl);
+  const imageRect = ready
+    ? getDisplayedImageRect()
+    : { leftPercent: 0, topPercent: 0, widthPercent: 100, heightPercent: 100 };
+
+  els.roomBoard.style.setProperty("--image-left", `${imageRect.leftPercent}%`);
+  els.roomBoard.style.setProperty("--image-top", `${imageRect.topPercent}%`);
+  els.roomBoard.style.setProperty("--image-width", `${imageRect.widthPercent}%`);
+  els.roomBoard.style.setProperty("--image-height", `${imageRect.heightPercent}%`);
+  els.roomBoard.style.setProperty("--grid-columns", String(GRID_COLUMNS));
+  els.roomBoard.style.setProperty("--grid-rows", String(GRID_ROWS));
+}
+
+function clamp01(value) {
+  return Math.min(0.999999, Math.max(0, value));
+}
+
+function clampGridIndex(value, size) {
+  return Math.min(size - 1, Math.max(0, Math.round(value)));
 }
 
 function setLog(message) {

@@ -226,6 +226,12 @@ h2 {
 }
 
 .room-board {
+  --image-left: 0%;
+  --image-top: 0%;
+  --image-width: 100%;
+  --image-height: 100%;
+  --grid-columns: 24;
+  --grid-rows: 24;
   position: absolute;
   inset: 0;
   display: none;
@@ -239,24 +245,19 @@ h2 {
 .room-board::after {
   content: "";
   position: absolute;
-  inset: 0;
+  left: var(--image-left);
+  top: var(--image-top);
+  width: var(--image-width);
+  height: var(--image-height);
   pointer-events: none;
-  background:
+  background-image:
     linear-gradient(to bottom, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.14)),
-    repeating-linear-gradient(
-      90deg,
-      rgba(255, 255, 255, 0.12) 0,
-      rgba(255, 255, 255, 0.12) 1px,
-      transparent 1px,
-      transparent 96px
-    ),
-    repeating-linear-gradient(
-      0deg,
-      rgba(255, 255, 255, 0.12) 0,
-      rgba(255, 255, 255, 0.12) 1px,
-      transparent 1px,
-      transparent 96px
-    );
+    linear-gradient(to right, rgba(255, 255, 255, 0.16) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.16) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    calc(100% / var(--grid-columns)) 100%,
+    100% calc(100% / var(--grid-rows));
   opacity: 0.4;
 }
 
@@ -267,9 +268,10 @@ h2 {
 .room-image,
 .furniture-layer {
   position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
+  left: var(--image-left);
+  top: var(--image-top);
+  width: var(--image-width);
+  height: var(--image-height);
 }
 
 .room-image {
