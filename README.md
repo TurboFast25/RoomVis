@@ -31,3 +31,31 @@ Then visit `http://localhost:4173`.
 The server proxies generation requests to Google's Gemini image API using `gemini-3.1-flash-image-preview`.
 
 The API key should stay in an environment variable, not in frontend files.
+
+## Deploy to Vercel
+
+The frontend is static and the API now runs through Vercel Python Functions:
+
+- `api/analyze.py`
+- `api/generate.py`
+- `vercel.json`
+
+Deploy steps:
+
+```bash
+npm i -g vercel
+vercel
+vercel env add GEMINI_API_KEY
+vercel --prod
+```
+
+Optional environment variables:
+
+- `ROOMVIS_GEMINI_MODEL`
+- `ROOMVIS_ANALYSIS_MODEL`
+
+After the first `vercel` link step, subsequent production deploys are just:
+
+```bash
+vercel --prod
+```
