@@ -10,6 +10,54 @@
   --primary-strong: #135547;
   --highlight: #f3b34c;
   --shadow: 0 24px 60px rgba(63, 40, 24, 0.16);
+  --body-top-glow: rgba(255, 244, 224, 0.95);
+  --body-bottom-glow: rgba(197, 111, 77, 0.18);
+  --body-start: #eadcc9;
+  --body-mid: #f6efe6;
+  --body-end: #ded2c3;
+  --surface: rgba(255, 255, 255, 0.72);
+  --surface-strong: rgba(255, 255, 255, 0.65);
+  --surface-soft: rgba(255, 255, 255, 0.58);
+  --board-start: rgba(255, 255, 255, 0.56);
+  --board-end: rgba(255, 255, 255, 0.2);
+  --grid-line: rgba(255, 255, 255, 0.06);
+  --image-backdrop: rgba(255, 255, 255, 0.55);
+  --viewer-backdrop: rgba(255, 255, 255, 0.28);
+  --viewer-radial-a: rgba(255, 255, 255, 0.16);
+  --viewer-radial-b: rgba(0, 0, 0, 0.08);
+  --log-bg: #171412;
+  --log-ink: #efe7de;
+}
+
+body[data-theme="dark"] {
+  --bg: #0f1418;
+  --bg-accent: #5fc3b4;
+  --panel: rgba(14, 20, 24, 0.82);
+  --panel-border: rgba(173, 219, 213, 0.12);
+  --ink: #edf4ef;
+  --muted: #9fb3ab;
+  --line: rgba(237, 244, 239, 0.12);
+  --primary: #4eb6a6;
+  --primary-strong: #78d5c7;
+  --highlight: #f0bf63;
+  --shadow: 0 28px 72px rgba(0, 0, 0, 0.42);
+  --body-top-glow: rgba(78, 182, 166, 0.18);
+  --body-bottom-glow: rgba(14, 85, 98, 0.24);
+  --body-start: #091116;
+  --body-mid: #101a20;
+  --body-end: #162027;
+  --surface: rgba(17, 25, 30, 0.9);
+  --surface-strong: rgba(19, 28, 34, 0.92);
+  --surface-soft: rgba(17, 25, 30, 0.88);
+  --board-start: rgba(255, 255, 255, 0.03);
+  --board-end: rgba(255, 255, 255, 0.01);
+  --grid-line: rgba(255, 255, 255, 0.04);
+  --image-backdrop: rgba(255, 255, 255, 0.04);
+  --viewer-backdrop: rgba(3, 8, 11, 0.38);
+  --viewer-radial-a: rgba(255, 255, 255, 0.05);
+  --viewer-radial-b: rgba(0, 0, 0, 0.24);
+  --log-bg: #081015;
+  --log-ink: #dce9e3;
 }
 
 * {
@@ -26,9 +74,9 @@ body {
   font-family: "Space Grotesk", sans-serif;
   color: var(--ink);
   background:
-    radial-gradient(circle at top left, rgba(255, 244, 224, 0.95), transparent 32%),
-    radial-gradient(circle at bottom right, rgba(197, 111, 77, 0.18), transparent 28%),
-    linear-gradient(135deg, #eadcc9 0%, #f6efe6 48%, #ded2c3 100%);
+    radial-gradient(circle at top left, var(--body-top-glow), transparent 32%),
+    radial-gradient(circle at bottom right, var(--body-bottom-glow), transparent 28%),
+    linear-gradient(135deg, var(--body-start) 0%, var(--body-mid) 48%, var(--body-end) 100%);
 }
 
 button,
@@ -43,7 +91,8 @@ input[type="url"] {
   padding: 12px 14px;
   border-radius: 16px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .app-shell {
@@ -115,7 +164,7 @@ h2 {
   padding: 18px;
   border-radius: 22px;
   border: 1px dashed rgba(28, 109, 93, 0.35);
-  background: linear-gradient(180deg, rgba(28, 109, 93, 0.08), rgba(28, 109, 93, 0.02));
+  background: linear-gradient(180deg, rgba(28, 109, 93, 0.12), rgba(28, 109, 93, 0.03));
   cursor: pointer;
 }
 
@@ -155,7 +204,7 @@ h2 {
   padding: 14px;
   border-radius: 20px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.65);
+  background: var(--surface-strong);
   cursor: grab;
   text-align: left;
 }
@@ -222,11 +271,11 @@ h2 {
   height: 100%;
   border-radius: 28px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.56), rgba(255, 255, 255, 0.2)),
+    linear-gradient(180deg, var(--board-start), var(--board-end)),
     repeating-linear-gradient(
       90deg,
-      rgba(255, 255, 255, 0.06) 0,
-      rgba(255, 255, 255, 0.06) 1px,
+      var(--grid-line) 0,
+      var(--grid-line) 1px,
       transparent 1px,
       transparent 120px
     );
@@ -285,7 +334,7 @@ h2 {
 
 .room-image {
   object-fit: contain;
-  background: rgba(255, 255, 255, 0.55);
+  background: var(--image-backdrop);
 }
 
 .furniture-layer {
@@ -356,7 +405,8 @@ textarea {
   padding: 14px;
   border-radius: 18px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface);
+  color: var(--ink);
 }
 
 .primary-button,
@@ -378,7 +428,7 @@ textarea {
 }
 
 .ghost-button {
-  background: rgba(255, 255, 255, 0.66);
+  background: var(--surface-strong);
   border-color: var(--line);
   color: var(--ink);
 }
@@ -407,8 +457,8 @@ textarea {
   padding: 14px;
   min-height: 140px;
   border-radius: 18px;
-  background: #171412;
-  color: #efe7de;
+  background: var(--log-bg);
+  color: var(--log-ink);
   overflow: auto;
   white-space: pre-wrap;
 }
@@ -440,7 +490,7 @@ textarea {
 .result-nav__button {
   appearance: none;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.72);
+  background: var(--surface);
   color: var(--ink);
   border-radius: 999px;
   padding: 9px 14px;
@@ -458,7 +508,7 @@ textarea {
   aspect-ratio: var(--result-aspect-ratio, 4 / 5);
   border-radius: 24px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.58);
+  background: var(--surface-soft);
   overflow: hidden;
 }
 
@@ -476,8 +526,8 @@ textarea {
   place-items: center;
   cursor: grab;
   background:
-    radial-gradient(circle at center, rgba(255, 255, 255, 0.16), rgba(0, 0, 0, 0.08)),
-    rgba(255, 255, 255, 0.28);
+    radial-gradient(circle at center, var(--viewer-radial-a), var(--viewer-radial-b)),
+    var(--viewer-backdrop);
   touch-action: none;
 }
 
@@ -495,7 +545,7 @@ textarea {
   transform-origin: center center;
   will-change: transform;
   transition: transform 120ms ease-out;
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--image-backdrop);
 }
 
 .result-viewer-hint {

@@ -5,6 +5,7 @@ import {
 
 const GRID_COLUMNS = 24;
 const GRID_ROWS = 24;
+const THEME_STORAGE_KEY = "roomvis-theme";
 
 const furnitureCatalog = [
   createCatalogItem({
@@ -46,6 +47,7 @@ const furnitureCatalog = [
 ];
 
 const state = {
+  theme: "light",
   items: [],
   selectedId: null,
   roomImageDataUrl: "",
@@ -84,6 +86,7 @@ const els = {
   generateScene: document.querySelector("#generate-scene"),
   resetRoom: document.querySelector("#reset-room"),
   toggleGrid: document.querySelector("#toggle-grid"),
+  toggleTheme: document.querySelector("#toggle-theme"),
   generatedImage: document.querySelector("#generated-image"),
   resultNav: document.querySelector("#result-nav"),
   resultFrame: document.querySelector("#result-frame"),
@@ -99,6 +102,7 @@ const els = {
 };
 
 renderFurnitureLibrary();
+hydrateTheme();
 attachEvents();
 render();
 
@@ -117,11 +121,29 @@ function attachEvents() {
   els.generateScene.addEventListener("click", generateScene);
   els.resetRoom.addEventListener("click", resetRoom);
   els.toggleGrid.addEventListener("click", toggleGrid);
+  els.toggleTheme.addEventListener("click", toggleTheme);
   els.addCustomItem.addEventListener("click", addCustomItemToLibrary);
   els.resultViewer.addEventListener("pointerdown", beginResultViewerDrag);
   els.resultViewer.addEventListener("wheel", handleResultViewerWheel, { passive: false });
   els.generatedImage.addEventListener("load", handleGeneratedImageLoad);
   document.addEventListener("keydown", handleKeydown);
+}
+
+function hydrateTheme() {
+  const storedTheme = window.localStorage.getItem(THEME_STORAGE_KEY);
+  const preferredTheme = storedTheme || "dark";
+  applyTheme(preferredTheme);
+}
+
+function toggleTheme() {
+  applyTheme(state.theme === "dark" ? "light" : "dark");
+}
+
+function applyTheme(theme) {
+  state.theme = theme === "dark" ? "dark" : "light";
+  document.body.dataset.theme = state.theme;
+  els.toggleTheme.textContent = state.theme === "dark" ? "Light Mode" : "Dark Mode";
+  window.localStorage.setItem(THEME_STORAGE_KEY, state.theme);
 }
 
 function renderFurnitureLibrary() {
