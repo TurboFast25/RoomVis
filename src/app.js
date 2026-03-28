@@ -1,6 +1,6 @@
 import {
   requestRoomAnalysis,
-  requestNanoBananaTour,
+  requestNanoBananaGeneration,
 } from "./services/nanoBanana.js";
 
 const GRID_COLUMNS = 24;
@@ -404,16 +404,25 @@ async function generateScene() {
     })),
   };
 
-  setLog("Submitting staged room payload to Nano Banana multi-view service...");
+  setLog("Submitting staged room payload to Nano Banana image service...");
   setResultState({ status: "Generating...", views: [], activeViewId: "" });
 
   try {
-    const result = await requestNanoBananaTour(payload);
+    const result = await requestNanoBananaGeneration(payload);
     setLog(JSON.stringify(result.meta, null, 2));
     setResultState({
-      status: result.views?.length ? "Tour ready" : "No views returned",
-      views: result.views || [],
-      activeViewId: result.defaultViewId || result.views?.[0]?.id || "",
+      status: result.imageDataUrl ? "Result ready" : "No image returned",
+      views: result.imageDataUrl
+        ? [
+            {
+              id: "result",
+              label: "Result",
+              hint: "Generated room image",
+              imageDataUrl: result.imageDataUrl,
+            },
+          ]
+        : [],
+      activeViewId: "result",
     });
   } catch (error) {
     setLog(`Generation failed: ${error.message}`);
@@ -443,24 +452,20 @@ function renderPlacedItems() {
   state.items.forEach((item) => {
     const fragment = els.placedTemplate.content.cloneNode(true);
     const button = fragment.querySelector(".placed-item");
-    const model = fragment.querySelector(".placed-item__model");
-    const metrics = getModelMetrics(item);
+    const sprite = fragment.querySelector(".placed-item__sprite");
+    const metrics = getSpriteMetrics(item);
 
     button.dataset.instanceId = item.instanceId;
     button.style.left = `${item.x}%`;
     button.style.top = `${item.y}%`;
     button.style.setProperty("--model-width", `${metrics.width}px`);
     button.style.setProperty("--model-height", `${metrics.height}px`);
-    button.style.setProperty("--model-depth", `${metrics.depth}px`);
-    button.style.setProperty("--model-color", item.color || "#b9a28d");
-    button.style.setProperty("--shadow-width", `${metrics.shadowWidth}px`);
-    button.style.setProperty("--shadow-height", `${metrics.shadowHeight}px`);
-    button.style.setProperty("--shadow-opacity", `${metrics.shadowOpacity}`);
     button.style.transform =
       `translate(-50%, calc(-100% + ${item.elevation}px)) rotate(${item.rotation}deg)`;
     button.classList.toggle("is-selected", item.instanceId === state.selectedId);
     button.dataset.silhouette = item.silhouette || "custom";
-    model.setAttribute("aria-label", item.name);
+    sprite.src = item.imageUrl;
+    sprite.alt = item.name;
 
     els.furnitureLayer.appendChild(fragment);
   });
@@ -544,7 +549,7 @@ function syncBoardToImage() {
   els.roomBoard.style.setProperty("--grid-rows", String(GRID_ROWS));
 }
 
-function getModelMetrics(item) {
+function getSpriteMetrics(item) {
   const base = {
     sofa: { width: 132, height: 70, depth: 48 },
     chair: { width: 84, height: 96, depth: 42 },
@@ -560,10 +565,6 @@ function getModelMetrics(item) {
   return {
     width: Math.round(base.width * scale),
     height: Math.round(base.height * scale),
-    depth: Math.round(base.depth * scale),
-    shadowWidth: Math.round(base.width * scale * 0.72),
-    shadowHeight: Math.max(12, Math.round(base.depth * scale * 0.32)),
-    shadowOpacity: Math.min(0.45, 0.16 + scale * 0.12),
   };
 }
 
@@ -641,7 +642,7 @@ function renderResultNav() {
     button.addEventListener("click", () => {
       state.activeViewId = view.id;
       setResultState({
-        status: "Tour ready",
+        status: "Result ready",
         views: state.generatedTour,
         activeViewId: view.id,
       });
@@ -778,12 +779,12 @@ function createCatalogItem({ id, name, color, silhouette }) {
 
 function createFurnitureSwatch({ color, silhouette }) {
   const svg = {
-    sofa: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#f6efe4"/><rect x="22" y="52" width="76" height="28" rx="10" fill="${color}"/><rect x="18" y="44" width="24" height="36" rx="10" fill="${color}"/><rect x="78" y="44" width="24" height="36" rx="10" fill="${color}"/><rect x="28" y="36" width="64" height="18" rx="9" fill="#fff" fill-opacity=".38"/><rect x="26" y="80" width="6" height="12" rx="3" fill="#694f3d"/><rect x="88" y="80" width="6" height="12" rx="3" fill="#694f3d"/></svg>`,
-    chair: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#f6efe4"/><rect x="36" y="32" width="48" height="32" rx="14" fill="${color}"/><rect x="30" y="58" width="60" height="18" rx="9" fill="${color}"/><rect x="36" y="76" width="7" height="18" rx="3" fill="#694f3d"/><rect x="77" y="76" width="7" height="18" rx="3" fill="#694f3d"/></svg>`,
-    lamp: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#f6efe4"/><path d="M42 38h36L66 60H54z" fill="${color}"/><rect x="57" y="60" width="6" height="26" rx="3" fill="#694f3d"/><rect x="42" y="86" width="36" height="8" rx="4" fill="#694f3d"/></svg>`,
-    table: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#f6efe4"/><rect x="24" y="38" width="72" height="16" rx="8" fill="${color}"/><rect x="34" y="54" width="6" height="34" rx="3" fill="#694f3d"/><rect x="80" y="54" width="6" height="34" rx="3" fill="#694f3d"/></svg>`,
-    plant: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#f6efe4"/><path d="M60 26c14 8 16 24 7 36-11-4-17-18-7-36zM40 40c12 3 18 16 14 29-11 0-20-11-14-29zM80 40c6 18-3 29-14 29-4-13 2-26 14-29z" fill="${color}"/><path d="M44 72h32l-6 20H50z" fill="#9a6a44"/></svg>`,
-    shelf: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="28" fill="#f6efe4"/><rect x="30" y="24" width="8" height="72" rx="4" fill="${color}"/><rect x="82" y="24" width="8" height="72" rx="4" fill="${color}"/><rect x="30" y="30" width="60" height="8" rx="4" fill="${color}"/><rect x="30" y="54" width="60" height="8" rx="4" fill="${color}"/><rect x="30" y="78" width="60" height="8" rx="4" fill="${color}"/></svg>`,
+    sofa: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect x="22" y="52" width="76" height="28" rx="10" fill="${color}"/><rect x="18" y="44" width="24" height="36" rx="10" fill="${color}"/><rect x="78" y="44" width="24" height="36" rx="10" fill="${color}"/><rect x="28" y="36" width="64" height="18" rx="9" fill="#fff" fill-opacity=".38"/><rect x="26" y="80" width="6" height="12" rx="3" fill="#694f3d"/><rect x="88" y="80" width="6" height="12" rx="3" fill="#694f3d"/></svg>`,
+    chair: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect x="36" y="32" width="48" height="32" rx="14" fill="${color}"/><rect x="30" y="58" width="60" height="18" rx="9" fill="${color}"/><rect x="36" y="76" width="7" height="18" rx="3" fill="#694f3d"/><rect x="77" y="76" width="7" height="18" rx="3" fill="#694f3d"/></svg>`,
+    lamp: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M42 38h36L66 60H54z" fill="${color}"/><rect x="57" y="60" width="6" height="26" rx="3" fill="#694f3d"/><rect x="42" y="86" width="36" height="8" rx="4" fill="#694f3d"/></svg>`,
+    table: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect x="24" y="38" width="72" height="16" rx="8" fill="${color}"/><rect x="34" y="54" width="6" height="34" rx="3" fill="#694f3d"/><rect x="80" y="54" width="6" height="34" rx="3" fill="#694f3d"/></svg>`,
+    plant: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><path d="M60 26c14 8 16 24 7 36-11-4-17-18-7-36zM40 40c12 3 18 16 14 29-11 0-20-11-14-29zM80 40c6 18-3 29-14 29-4-13 2-26 14-29z" fill="${color}"/><path d="M44 72h32l-6 20H50z" fill="#9a6a44"/></svg>`,
+    shelf: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect x="30" y="24" width="8" height="72" rx="4" fill="${color}"/><rect x="82" y="24" width="8" height="72" rx="4" fill="${color}"/><rect x="30" y="30" width="60" height="8" rx="4" fill="${color}"/><rect x="30" y="54" width="60" height="8" rx="4" fill="${color}"/><rect x="30" y="78" width="60" height="8" rx="4" fill="${color}"/></svg>`,
   }[silhouette];
 
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;

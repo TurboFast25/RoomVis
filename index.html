@@ -103,11 +103,11 @@
               <div id="result-placeholder" class="result-placeholder">
                 Generated room preview will appear here.
               </div>
-            </div>
-            <p id="result-viewer-hint" class="helper-copy result-viewer-hint" hidden>
-              Drag to look around the generated room. Use the mouse wheel or trackpad to zoom.
-            </p>
-          </section>
+          </div>
+          <p id="result-viewer-hint" class="helper-copy result-viewer-hint" hidden>
+            Use the mouse wheel or trackpad to zoom. Drag to pan when zoomed in.
+          </p>
+        </section>
         </div>
       </main>
 
@@ -175,14 +175,7 @@
 
     <template id="placed-item-template">
       <button class="placed-item" type="button">
-        <span class="placed-item__shadow" aria-hidden="true"></span>
-        <span class="placed-item__model">
-          <span class="placed-item__face placed-item__face--top"></span>
-          <span class="placed-item__face placed-item__face--front"></span>
-          <span class="placed-item__face placed-item__face--side"></span>
-          <span class="placed-item__detail placed-item__detail--a"></span>
-          <span class="placed-item__detail placed-item__detail--b"></span>
-        </span>
+        <img class="placed-item__sprite" alt="" draggable="false" />
       </button>
     </template>
 
