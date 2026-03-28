@@ -653,9 +653,9 @@ function setResultState({ status, views, activeViewId }) {
 
   resetResultViewer();
   els.resultNav.hidden = state.generatedTour.length <= 1;
+  els.resultViewer.hidden = false;
   els.generatedImage.src = activeView.imageDataUrl;
   els.generatedImage.hidden = false;
-  els.resultViewer.hidden = false;
   els.resultViewerHint.hidden = false;
   els.resultPlaceholder.hidden = true;
 }

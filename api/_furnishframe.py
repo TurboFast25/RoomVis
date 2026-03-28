@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 import urllib.error
 import urllib.request
 from http import HTTPStatus
@@ -206,8 +207,6 @@ def build_analysis_request(payload: dict) -> dict:
             "temperature": 0.2,
         },
     }
-
-
 def parse_data_url(data_url: str) -> tuple[str, str]:
     if not data_url.startswith("data:") or "," not in data_url:
         raise ValueError("roomImageDataUrl must be a valid data URL")
